@@ -39,8 +39,12 @@ public class Main {
                 uniqueStrings.add(newString);
             }
 
-            try {
-                nums = parseString2(newString); // пропускаем некорректно записанные строки
+            try { // пропускаем некорректно записанные строки
+                if (filePath.contains("lng.txt")){
+                    nums = parseString1(newString);
+                } else {
+                    nums = parseString2(newString);
+                }
             } catch (NumberFormatException e) {
                 continue;
             }
@@ -73,7 +77,8 @@ public class Main {
 //        for (Group group : listGroups){
 //            group.checkParent();
 //        }
-        String answerFilePath = filePath.replace(".csv", "-answer.csv");
+        String answerFilePath = filePath.replace(".txt", "-answer.txt");
+        answerFilePath = answerFilePath.replace(".csv", "-answer.csv");
         writeFile(listGroups, answerFilePath);
     }
 
@@ -125,7 +130,11 @@ public class Main {
             for (int i = 0; i < groups.size(); i++) {
                 writer.write("Группа " + (i + 1) + "\n");
 
-                writeGroup2(writer, groups.get(i));
+                if (filePath.contains("lng.txt")){
+                    writeGroup1(writer, groups.get(i));
+                } else {
+                    writeGroup2(writer, groups.get(i));
+                }
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
