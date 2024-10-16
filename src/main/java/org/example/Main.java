@@ -29,6 +29,7 @@ public class Main {
 
         HashSet<String> uniqueStrings = new HashSet<>(); // Множество используется для удаления повторяющихся строк.
 
+        int fileFormat = 0;
         while (in.hasNext()) {
             Number[] nums;
             String newString = in.nextLine();
@@ -39,8 +40,12 @@ public class Main {
                 uniqueStrings.add(newString);
             }
 
+            if (fileFormat == 0){
+                fileFormat = getFileFormat(newString);
+            }
+
             try { // пропускаем некорректно записанные строки
-                if (filePath.contains("lng.txt")){
+                if (fileFormat == 1){
                     nums = parseString1(newString);
                 } else {
                     nums = parseString2(newString);
@@ -74,12 +79,23 @@ public class Main {
         // считаем количество групп с более чем одним элементом
         List<Group> listGroups = groups.stream().filter(g -> !g.hasParent()).sorted((x, y) -> y.countGroupSize() - x.countGroupSize()).toList();
 
-//        for (Group group : listGroups){
-//            group.checkParent();
-//        }
-        String answerFilePath = filePath.replace(".txt", "-answer.txt");
-        answerFilePath = answerFilePath.replace(".csv", "-answer.csv");
-        writeFile(listGroups, answerFilePath);
+        String answerFilePath = "answer.txt";
+        writeFile(listGroups, answerFilePath, fileFormat);
+    }
+
+    // Этот метод нужен, чтобы определить какой файл подан на вход, чтобы понять как нам следует его парсить
+    // Пока поддерживается 2 формата
+    public static int getFileFormat(String str){
+        String[] strArr = str.split(";", -1);
+        if (strArr[0].equals("\"\"") || strArr[0].contains("79")){
+            return 1;
+        }
+        else if (strArr[0].isEmpty() || strArr[0].contains(".")){
+            return 2;
+        }
+        else {
+            throw new IllegalStateException("Неизвестный формат файла");
+        }
     }
 
     // Преобразует считанную строку в массив целых чисел. Так как первые две цифры числа всегда одинаковы, то они удаляются
@@ -122,7 +138,7 @@ public class Main {
     }
 
     // Следующие 3 метода нужны для записи ответа в файл
-    public static void writeFile(List<Group> groups, String filePath) {
+    public static void writeFile(List<Group> groups, String filePath, int fileFormat) {
         try (FileWriter writer = new FileWriter(filePath)) {
             long count = groups.stream().filter(x -> x.countGroupSize() > 1).count();
             writer.write(count + "\n");
@@ -130,7 +146,7 @@ public class Main {
             for (int i = 0; i < groups.size(); i++) {
                 writer.write("Группа " + (i + 1) + "\n");
 
-                if (filePath.contains("lng.txt")){
+                if (fileFormat == 1){
                     writeGroup1(writer, groups.get(i));
                 } else {
                     writeGroup2(writer, groups.get(i));
